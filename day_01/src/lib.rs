@@ -1,12 +1,6 @@
 use std::fs;
 
-#[derive(Debug)]
-pub(crate) enum Dir {
-    Left(i32),
-    Right(i32),
-}
-
-pub(crate) fn parse_input(path: &str) -> Vec<Dir> {
+pub(crate) fn parse_input(path: &str) -> Vec<i32> {
     let input = fs::read_to_string(path).unwrap();
 
     input
@@ -16,8 +10,8 @@ pub(crate) fn parse_input(path: &str) -> Vec<Dir> {
             let amount = &line[1..];
 
             match dir {
-                "L" => Dir::Left(amount.parse().unwrap()),
-                "R" => Dir::Right(amount.parse().unwrap()),
+                "L" => -(amount.parse::<i32>().unwrap()),
+                "R" => amount.parse::<i32>().unwrap(),
                 _ => panic!("unexpected dir"),
             }
         })
@@ -31,42 +25,13 @@ pub fn part_1(input: &str) -> i32 {
     let mut current = 50;
 
     for dir in dirs {
-        current = match dir {
-            Dir::Left(amount) => {
-                let result = current - (amount % 100);
-                if result < 0 { 100 + result } else { result }
-            }
-            Dir::Right(amount) => {
-                let result = current + (amount % 100);
-                if result > 99 { result % 100 } else { result }
-            }
-        };
+        let diff = (dir + current) % 100;
 
-        if current == 0 {
-            zero_count += 1;
+        if diff < 0 {
+            current = 100 + diff;
+        } else {
+            current = diff;
         }
-    }
-
-    zero_count
-}
-
-pub fn part_2(input: &str) -> i32 {
-    let dirs = parse_input(input);
-
-    let mut zero_count = 0;
-    let mut current = 50;
-
-    for dir in dirs {
-        current = match dir {
-            Dir::Left(amount) => {
-                let result = current - (amount % 100);
-                if result < 0 { 100 + result } else { result }
-            }
-            Dir::Right(amount) => {
-                let result = current + (amount % 100);
-                if result > 99 { result % 100 } else { result }
-            }
-        };
 
         if current == 0 {
             zero_count += 1;
@@ -86,7 +51,6 @@ mod tests {
         assert_eq!(res, 3);
     }
 
-    // 281
     #[test]
     fn part_1_test() {
         let res = part_1("./input.txt");
